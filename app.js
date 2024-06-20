@@ -1,13 +1,5 @@
-/*
-REMAINING PROJECTS
-2. An application that optionally takes two dates and prints the most starred GitHub projects in that date range. Hint you can use GitHub’s search API
-
-3. Bulk rename files in a directory. Hint you can use fs and path
-
-4. Write a CLI application that takes a path as input and compresses all the images in that directory. It should accept an option for output path; if the output path is not given it should compress images in place otherwise write the compressed images to the output path. Hint you can use sharp. 
-*/
-
 const readline = require("readline");
+
 /** Returns the value of a requested prompt in command line @param {string} text @returns string */
 const input = (text) =>
 	new Promise((resolve) => {
@@ -66,9 +58,70 @@ const printMostStarredProject = async () => {
 	}
 };
 
+/** Bulk rename files in a directory */
+const bulkRenameFiles = async () => {
+	const fs = require("fs");
+	const path = require("path");
+
+	/* // Prompt input for folder path
+	const folder = await input("Enter folder path:"); */
+
+	// For a folder in current working directory. e.g /images:
+	const folder = path.join(__dirname, "images");
+
+	const files = fs.readdirSync(folder);
+
+	// Rename all the files in the folder
+	files.forEach((file, index) => {
+		const filePath = path.join(folder, file);
+		const newFilePath = path.join(folder, `img${index + path.parse(file).ext}`);
+		fs.rename(filePath, newFilePath, (err) => console.error(err || ""));
+	});
+};
+
+/** Compress multiple images */
+const bulkCompressImages = async () => {
+	try {
+		const path = require("path");
+		const fs = require("fs");
+		const sharp = require("sharp");
+
+		// Recieve input and output paths
+		const inputImgDir = await input("Please enter directory containing images");
+		const outputImgDir =
+			(await input("Please enter output directory")) || inputImgDir;
+		if (!fs.existsSync(outputImgDir)) fs.mkdirSync(outputImgDir);
+
+		// Get all images, compress them and save into output folder
+		fs.readdirSync(inputImgDir).forEach((img) => {
+			try {
+				const outputFileName =
+					inputImgDir === outputImgDir ? `compressed--${img}` : img;
+				const outputPath = path.join(outputImgDir, outputFileName);
+
+				sharp(path.join(inputImgDir, img))
+					.resize(200, 200, { strategy: "cover" })
+					.toFile(outputPath, (err) => {
+						if (err) throw err;
+						console.log(`..compressed ${img} into ${outputPath}`);
+					});
+			} catch (err) {
+				console.error("Error: ", err.message);
+			}
+		});
+	} catch (err) {
+		console.error(err.message);
+	}
+};
+
 // MAIN
 (async () => {
-	const projects = ["selectTextContent", "mostStarredProject"];
+	const projects = [
+		"selectTextContent",
+		"mostStarredProject",
+		"bulkRenameFiles",
+		"bulkCompressImages",
+	];
 	const chosenProject = process.argv[2];
 	switch (chosenProject) {
 		case projects[0]:
@@ -76,6 +129,12 @@ const printMostStarredProject = async () => {
 			break;
 		case projects[1]:
 			await printMostStarredProject();
+			break;
+		case projects[2]:
+			await bulkRenameFiles();
+			break;
+		case projects[3]:
+			await bulkCompressImages();
 			break;
 		default:
 			console.error(`ERROR: Please choose a valid project e.g: [${projects}]`);
