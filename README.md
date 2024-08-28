@@ -1,4 +1,4 @@
-# CLI Projects
+# MULTI-FUNCTON CLI APP
 
 This repository contains a javascript file *app.js* with various CLI projects. Below is a list of the projects along with instructions on how to use them.
 
@@ -25,7 +25,7 @@ This repository contains a javascript file *app.js* with various CLI projects. B
 
 2. Install dependencies:
     ```sh
-    npm i
+    npm install
     ```
 
 ## Usage
